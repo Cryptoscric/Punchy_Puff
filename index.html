@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <title>Punchy Puff Meme Dashboard</title>
 
-  <!-- Libreria grafici -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lightweight Charts (TradingView) -->
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 
   <style>
     body {
@@ -22,6 +22,7 @@
       margin-bottom: 10px;
       color: #e0e1dd;
       text-shadow: 0 0 12px rgba(137,207,240,0.5);
+      letter-spacing: 1px;
     }
 
     #punchy-price {
@@ -38,7 +39,7 @@
       margin: 20px auto;
       padding: 25px;
       border-radius: 18px;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.65);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       box-shadow: 0 0 25px rgba(0,0,0,0.35);
@@ -59,15 +60,12 @@
       border-radius: 10px;
       cursor: pointer;
       font-size: 17px;
+      transition: background 0.3s, transform 0.2s;
     }
 
     #toggle-dark:hover {
       background: #778da9;
       transform: scale(1.05);
-    }
-
-    canvas {
-      margin-top: 20px;
     }
 
     .logo-wrapper {
@@ -81,10 +79,15 @@
       border-radius: 12px;
       box-shadow: 0 0 20px rgba(137,207,240,0.4);
     }
+
+    #candles-container {
+      width: 100%;
+      height: 400px;
+    }
   </style>
 </head>
 
-<body class="dark-mode">
+<body>
 
   <div class="logo-wrapper">
     <img src="logo.png" alt="Punchy Puff Logo">
@@ -98,10 +101,10 @@
     <div id="volume">Volume 24h: ...</div>
   </div>
 
-  <button id="toggle-dark">Disattiva Tema Scuro</button>
+  <button id="toggle-dark">Tema Scuro/Chiaro</button>
 
   <div class="card">
-    <canvas id="chart"></canvas>
+    <div id="candles-container"></div>
   </div>
 
   <script>
@@ -128,60 +131,89 @@
       }
     }
 
-    async function loadChart() {
+    // Ricostruzione candele giornaliere da dati di prezzo
+    function buildDailyCandles(prices) {
+      const byDay = {};
+
+      prices.forEach(p => {
+        const ts = p[0];
+        const price = p[1];
+        const d = new Date(ts);
+        const dayKey = d.getUTCFullYear() + "-" + (d.getUTCMonth()+1) + "-" + d.getUTCDate();
+
+        if (!byDay[dayKey]) {
+          byDay[dayKey] = {
+            time: Math.floor(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) / 1000),
+            open: price,
+            high: price,
+            low: price,
+            close: price
+          };
+        } else {
+          byDay[dayKey].high = Math.max(byDay[dayKey].high, price);
+          byDay[dayKey].low = Math.min(byDay[dayKey].low, price);
+          byDay[dayKey].close = price;
+        }
+      });
+
+      return Object.values(byDay).sort((a, b) => a.time - b.time);
+    }
+
+    async function loadCandles() {
       try {
         const res = await fetch("https://api.coingecko.com/api/v3/coins/punchy-puff/market_chart?vs_currency=usd&days=7");
         const data = await res.json();
 
-        const prices = data.prices.map(p => p[1]);
-        const labels = data.prices.map(p => new Date(p[0]).toLocaleDateString());
+        const prices = data.prices; // [ [timestamp, price], ... ]
+        const candles = buildDailyCandles(prices);
 
-        new Chart(document.getElementById("chart"), {
-          type: "line",
-          data: {
-            labels: labels,
-            datasets: [{
-              label: "Punchy Puff — Ultimi 7 Giorni",
-              data: prices,
-              borderColor: "#89cff0",
-              backgroundColor: "rgba(137,207,240,0.15)",
-              borderWidth: 3,
-              pointRadius: 3,
-              pointBackgroundColor: "#89cff0",
-              tension: 0.35
-            }]
+        const container = document.getElementById("candles-container");
+        const chart = LightweightCharts.createChart(container, {
+          layout: {
+            background: { type: 'transparent' },
+            textColor: '#e0e1dd',
           },
-          options: {
-            plugins: {
-              legend: {
-                labels: { color: "#e0e1dd" }
-              }
-            },
-            scales: {
-              x: {
-                ticks: { color: "#e0e1dd" }
-              },
-              y: {
-                ticks: { color: "#e0e1dd" }
-              }
-            }
+          grid: {
+            vertLines: { color: 'rgba(255,255,255,0.1)' },
+            horzLines: { color: 'rgba(255,255,255,0.1)' },
+          },
+          rightPriceScale: {
+            borderColor: 'rgba(255,255,255,0.2)',
+          },
+          timeScale: {
+            borderColor: 'rgba(255,255,255,0.2)',
           }
         });
+
+        const candleSeries = chart.addCandlestickSeries({
+          upColor: '#26a69a',
+          downColor: '#ef5350',
+          borderDownColor: '#ef5350',
+          borderUpColor: '#26a69a',
+          wickDownColor: '#ef5350',
+          wickUpColor: '#26a69a',
+        });
+
+        candleSeries.setData(candles);
+
       } catch (e) {
-        console.log("Errore grafico:", e);
+        console.log("Errore candele:", e);
       }
     }
 
+    // Tema scuro/chiaro (solo overlay, lo sfondo resta il ring)
     document.getElementById("toggle-dark").addEventListener("click", () => {
-      document.body.classList.toggle("dark-mode");
-      document.getElementById("toggle-dark").innerText =
-        document.body.classList.contains("dark-mode")
-        ? "Disattiva Tema Scuro"
-        : "Attiva Tema Scuro";
+      document.body.classList.toggle("light-mode");
+      if (document.body.classList.contains("light-mode")) {
+        document.body.style.color = "#111";
+      } else {
+        document.body.style.color = "#e0e1dd";
+      }
     });
 
+    // Caricamento iniziale
     loadPrice();
-    loadChart();
+    loadCandles();
     setInterval(loadPrice, 30000);
   </script>
 </body>
