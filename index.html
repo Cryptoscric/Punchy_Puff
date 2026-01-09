@@ -96,7 +96,9 @@
   </style>
 </head>
 
-<body>
+<!-- TEMA SCURO ATTIVO DI DEFAULT -->
+<body class="dark-mode">
+
   <h1>Punchy Puff Dashboard</h1>
   <div id="punchy-price">Caricamento...</div>
 
@@ -105,7 +107,7 @@
     <div id="volume">Volume 24h: ...</div>
   </div>
 
-  <button id="toggle-dark">Attiva Tema Scuro</button>
+  <button id="toggle-dark">Disattiva Tema Scuro</button>
 
   <div id="chart-container">
     <canvas id="chart"></canvas>
@@ -150,8 +152,8 @@
             datasets: [{
               label: "Punchy Puff (ultimi 7 giorni)",
               data: prices,
-              borderColor: "#0077cc",
-              backgroundColor: "rgba(0,119,204,0.2)",
+              borderColor: "#89cff0",
+              backgroundColor: "rgba(137,207,240,0.2)",
               borderWidth: 2,
               tension: 0.3
             }]
@@ -162,7 +164,7 @@
       }
     }
 
-    // Tema scuro
+    // Tema scuro / chiaro
     document.getElementById("toggle-dark").addEventListener("click", () => {
       document.body.classList.toggle("dark-mode");
       document.getElementById("toggle-dark").innerText =
