@@ -9,107 +9,84 @@
 
   <style>
     body {
-      background-color: #d6ecff;
-      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0d1b2a, #1b263b);
+      font-family: "Segoe UI", Arial, sans-serif;
       text-align: center;
       padding: 20px;
-      transition: background-color 0.4s, color 0.4s;
-    }
-
-    .dark-mode {
-      background-color: #0d1b2a;
       color: #e0e1dd;
+      transition: background 0.4s, color 0.4s;
     }
 
     h1 {
-      color: #003366;
-      margin-bottom: 5px;
-      transition: color 0.4s;
-    }
-
-    .dark-mode h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
       color: #e0e1dd;
+      text-shadow: 0 0 10px rgba(137,207,240,0.4);
     }
 
     #punchy-price {
-      font-size: 32px;
+      font-size: 40px;
       font-weight: bold;
       margin-top: 10px;
-      color: #004a80;
-      transition: color 0.4s;
+      color: #89cff0;
+      text-shadow: 0 0 8px rgba(137,207,240,0.5);
     }
 
-    .dark-mode #punchy-price {
-      color: #89cff0;
+    .card {
+      width: 90%;
+      max-width: 700px;
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      transition: background 0.4s, box-shadow 0.4s;
     }
 
     .metrics {
-      margin-top: 20px;
-      font-size: 18px;
-      color: #003f66;
-      transition: color 0.4s;
-    }
-
-    .dark-mode .metrics {
-      color: #c9d6df;
-    }
-
-    #chart-container {
-      width: 90%;
-      max-width: 700px;
-      margin: 40px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      transition: background-color 0.4s, box-shadow 0.4s;
-    }
-
-    .dark-mode #chart-container {
-      background: #1b263b;
-      box-shadow: 0 0 10px rgba(255,255,255,0.1);
+      font-size: 20px;
+      margin-top: 10px;
+      line-height: 1.6;
     }
 
     #toggle-dark {
       margin-top: 20px;
-      padding: 10px 20px;
-      background: #004a80;
+      padding: 12px 24px;
+      background: #415a77;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
       font-size: 16px;
-      transition: background-color 0.3s;
+      transition: background 0.3s, transform 0.2s;
     }
 
     #toggle-dark:hover {
-      background: #006bb3;
-    }
-
-    .dark-mode #toggle-dark {
-      background: #415a77;
-    }
-
-    .dark-mode #toggle-dark:hover {
       background: #778da9;
+      transform: scale(1.05);
+    }
+
+    canvas {
+      margin-top: 20px;
     }
   </style>
 </head>
 
-<!-- TEMA SCURO ATTIVO DI DEFAULT -->
 <body class="dark-mode">
 
   <h1>Punchy Puff Dashboard</h1>
   <div id="punchy-price">Caricamento...</div>
 
-  <div class="metrics">
+  <div class="card metrics">
     <div id="market-cap">Market Cap: ...</div>
     <div id="volume">Volume 24h: ...</div>
   </div>
 
   <button id="toggle-dark">Disattiva Tema Scuro</button>
 
-  <div id="chart-container">
+  <div class="card">
     <canvas id="chart"></canvas>
   </div>
 
@@ -150,13 +127,30 @@
           data: {
             labels: labels,
             datasets: [{
-              label: "Punchy Puff (ultimi 7 giorni)",
+              label: "Punchy Puff — Ultimi 7 Giorni",
               data: prices,
               borderColor: "#89cff0",
-              backgroundColor: "rgba(137,207,240,0.2)",
-              borderWidth: 2,
-              tension: 0.3
+              backgroundColor: "rgba(137,207,240,0.15)",
+              borderWidth: 3,
+              pointRadius: 3,
+              pointBackgroundColor: "#89cff0",
+              tension: 0.35
             }]
+          },
+          options: {
+            plugins: {
+              legend: {
+                labels: { color: "#e0e1dd" }
+              }
+            },
+            scales: {
+              x: {
+                ticks: { color: "#e0e1dd" }
+              },
+              y: {
+                ticks: { color: "#e0e1dd" }
+              }
+            }
           }
         });
       } catch (e) {
