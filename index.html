@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>Punchy Puff Meme Dashboard</title>
-  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+
+  <!-- TradingView -->
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 
   <style>
     body {
@@ -27,6 +29,7 @@
       margin-bottom: 10px;
       color: #e0e1dd;
       text-shadow: 0 0 12px rgba(137,207,240,0.5);
+      letter-spacing: 1px;
     }
 
     #punchy-price {
@@ -67,20 +70,14 @@
       box-shadow: 0 0 20px rgba(137,207,240,0.4);
     }
 
-    #candles-container {
+    .tradingview-widget-container {
       width: 100%;
       height: 400px;
-      position: relative;
     }
 
-    #no-data {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #ccc;
-      font-size: 18px;
-      font-style: italic;
+    .tradingview-widget-container__widget {
+      width: 100%;
+      height: 400px;
     }
   </style>
 </head>
@@ -92,7 +89,7 @@
   </div>
 
   <h1>Punchy Puff Dashboard</h1>
-  <div id="punchy-price">Caricamento...</div>
+  <div id="punchy-price">PUNCHY: ... $</div>
 
   <div class="card metrics">
     <div id="market-cap">Market Cap: ...</div>
@@ -100,106 +97,36 @@
   </div>
 
   <div class="card">
-    <div id="candles-container">
-      <div id="no-data" style="display:none;">Nessun dato disponibile</div>
+    <div class="tradingview-widget-container">
+      <div id="tradingview_chart" class="tradingview-widget-container__widget"></div>
     </div>
   </div>
 
   <script>
-    async function loadPrice() {
-      try {
-        const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=punchy-puff&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true");
-        const data = await res.json();
+    // Se in futuro avrai una tua API per prezzo/market cap/volume,
+    // potrai sostituire questa parte con le tue chiamate.
+    // Per ora lascio i campi statici come placeholder:
+    document.getElementById("punchy-price").innerText = "PUNCHY: 0.00058093 $";
+    document.getElementById("market-cap").innerText = "Market Cap: 290,462,664 $";
+    document.getElementById("volume").innerText = "Volume 24h: 1,924,264 $";
 
-        const price = data["punchy-puff"].usd;
-        const marketCap = data["punchy-puff"].usd_market_cap;
-        const volume = data["punchy-puff"].usd_24h_vol;
-
-        document.getElementById("punchy-price").innerText = "PUNCHY: " + price + " $";
-        document.getElementById("market-cap").innerText = "Market Cap: " + (marketCap ? marketCap.toLocaleString() + " $" : "N/D");
-        document.getElementById("volume").innerText = "Volume 24h: " + (volume ? volume.toLocaleString() + " $" : "N/D");
-
-      } catch (e) {
-        document.getElementById("punchy-price").innerText = "Errore nel caricamento";
-      }
-    }
-
-    function buildDailyCandles(prices) {
-      const byDay = {};
-      prices.forEach(p => {
-        const ts = p[0];
-        const price = p[1];
-        const d = new Date(ts);
-        const dayKey = d.getUTCFullYear() + "-" + (d.getUTCMonth()+1) + "-" + d.getUTCDate();
-
-        if (!byDay[dayKey]) {
-          byDay[dayKey] = {
-            time: Math.floor(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) / 1000),
-            open: price,
-            high: price,
-            low: price,
-            close: price
-          };
-        } else {
-          byDay[dayKey].high = Math.max(byDay[dayKey].high, price);
-          byDay[dayKey].low = Math.min(byDay[dayKey].low, price);
-          byDay[dayKey].close = price;
-        }
-      });
-
-      return Object.values(byDay).sort((a, b) => a.time - b.time);
-    }
-
-    async function loadCandles() {
-      try {
-        const res = await fetch("https://api.coingecko.com/api/v3/coins/punchy-puff/market_chart?vs_currency=usd&days=7");
-        const data = await res.json();
-
-        const prices = data.prices;
-        const candles = buildDailyCandles(prices);
-
-        if (!candles || candles.length < 2) {
-          document.getElementById("no-data").style.display = "block";
-          return;
-        }
-
-        const container = document.getElementById("candles-container");
-        const chart = LightweightCharts.createChart(container, {
-          layout: {
-            background: { type: 'transparent' },
-            textColor: '#e0e1dd',
-          },
-          grid: {
-            vertLines: { color: 'rgba(255,255,255,0.1)' },
-            horzLines: { color: 'rgba(255,255,255,0.1)' },
-          },
-          rightPriceScale: {
-            borderColor: 'rgba(255,255,255,0.2)',
-          },
-          timeScale: {
-            borderColor: 'rgba(255,255,255,0.2)',
-          }
-        });
-
-        const candleSeries = chart.addCandlestickSeries({
-          upColor: '#26a69a',
-          downColor: '#ef5350',
-          borderDownColor: '#ef5350',
-          borderUpColor: '#26a69a',
-          wickDownColor: '#ef5350',
-          wickUpColor: '#26a69a',
-        });
-
-        candleSeries.setData(candles);
-
-      } catch (e) {
-        document.getElementById("no-data").style.display = "block";
-      }
-    }
-
-    loadPrice();
-    loadCandles();
-    setInterval(loadPrice, 30000);
+    // TradingView widget
+    new TradingView.widget({
+      "width": "100%",
+      "height": 400,
+      "symbol": "RAYDIUMCPMM:PUNCHYSOL_3E5HFY",
+      "interval": "60",
+      "timezone": "Etc/UTC",
+      "theme": "dark",
+      "style": "1",
+      "locale": "it",
+      "toolbar_bg": "rgba(0,0,0,0.3)",
+      "enable_publishing": false,
+      "allow_symbol_change": false,
+      "hide_top_toolbar": false,
+      "hide_legend": false,
+      "container_id": "tradingview_chart"
+    });
   </script>
 </body>
 </html>
