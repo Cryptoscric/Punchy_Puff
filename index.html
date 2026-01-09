@@ -9,12 +9,12 @@
 
   <style>
     body {
-      background: linear-gradient(135deg, #0d1b2a, #1b263b);
+      background: url('ring.jpg') no-repeat center center fixed;
+      background-size: cover;
       font-family: "Segoe UI", Arial, sans-serif;
       text-align: center;
       padding: 20px;
       color: #e0e1dd;
-      transition: background 0.4s, color 0.4s;
     }
 
     h1 {
@@ -22,7 +22,6 @@
       margin-bottom: 10px;
       color: #e0e1dd;
       text-shadow: 0 0 12px rgba(137,207,240,0.5);
-      letter-spacing: 1px;
     }
 
     #punchy-price {
@@ -31,12 +30,6 @@
       margin-top: 10px;
       color: #89cff0;
       text-shadow: 0 0 10px rgba(137,207,240,0.6);
-      animation: fadeIn 1s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
     }
 
     .card {
@@ -45,11 +38,10 @@
       margin: 20px auto;
       padding: 25px;
       border-radius: 18px;
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       box-shadow: 0 0 25px rgba(0,0,0,0.35);
-      transition: background 0.4s, box-shadow 0.4s;
     }
 
     .metrics {
@@ -67,7 +59,6 @@
       border-radius: 10px;
       cursor: pointer;
       font-size: 17px;
-      transition: background 0.3s, transform 0.2s;
     }
 
     #toggle-dark:hover {
