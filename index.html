@@ -2,18 +2,18 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Punchy Puff Dashboard</title>
+  <title>Punchy Puff Meme Dashboard</title>
 </head>
 <body>
   <h1>Prezzo Punchy Puff</h1>
-  <div id="btc-price">Caricamento...</div>
+  <div id="punchy-price">Caricamento...</div>
 
   <script>
     async function loadPrice() {
-      const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=punchy-puff&vs_currencies=eur");
+      const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=punchy-puff&vs_currencies=usd");
       const data = await res.json();
-      document.getElementById("btc-price").innerText =
-        "BTC: " + data.bitcoin.eur + " €";
+      document.getElementById("punchy-price").innerText =
+        "PUNCHY: " + data.punchy-puff.usd + " $";
     }
     loadPrice();
   </script>
