@@ -3,21 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <title>Punchy Puff Meme Dashboard</title>
+
+  <!-- Libreria grafici -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      background-color: #d6ecff; /* azzurrino */
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #003366;
+    }
+
+    #punchy-price {
+      font-size: 28px;
+      font-weight: bold;
+      margin-top: 10px;
+      color: #004a80;
+    }
+
+    #chart-container {
+      width: 90%;
+      max-width: 700px;
+      margin: 40px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+  </style>
 </head>
+
 <body>
-  <h1>Prezzo Punchy Puff</h1>
+  <h1>Punchy Puff Dashboard</h1>
   <div id="punchy-price">Caricamento...</div>
+
+  <div id="chart-container">
+    <canvas id="chart"></canvas>
+  </div>
 
   <script>
     async function loadPrice() {
-      const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=punchy-puff&vs_currencies=usd");
-      const data = await res.json();
+      try {
+        const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=punchy-puff&vs_currencies=usd");
+        const data = await res.json();
 
-      document.getElementById("punchy-price").innerText =
-        "PUNCHY: " + data["punchy-puff"].usd + " $";
+        document.getElementById("punchy-price").innerText =
+          "PUNCHY: " + data["punchy-puff"].usd + " $";
+      } catch (e) {
+        document.getElementById("punchy-price").innerText = "Errore nel caricamento";
+      }
     }
 
+    async function loadChart() {
+      try {
+        const res = await fetch("https://api.coingecko.com/api/v3/coins/punchy-puff/market_chart?vs_currency=usd&days=7");
+        const data = await res.json();
+
+        const prices = data.prices.map(p => p[1]);
+        const labels = data.prices.map(p => new Date(p[0]).toLocaleDateString());
+
+        new Chart(document.getElementById("chart"), {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [{
+              label: "Punchy Puff (ultimi 7 giorni)",
+              data: prices,
+              borderColor: "#0077cc",
+              backgroundColor: "rgba(0,119,204,0.2)",
+              borderWidth: 2,
+              tension: 0.3
+            }]
+          }
+        });
+      } catch (e) {
+        console.log("Errore grafico:", e);
+      }
+    }
+
+    // Caricamento iniziale
     loadPrice();
+    loadChart();
+
+    // Aggiorna il prezzo ogni 30 secondi
+    setInterval(loadPrice, 30000);
   </script>
 </body>
 </html>
