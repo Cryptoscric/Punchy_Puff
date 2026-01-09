@@ -9,12 +9,20 @@
 
   <style>
     body {
-      background: url('ring.jpg') no-repeat center center fixed;
+      background: url('ring.jpg') no-repeat center center;
       background-size: cover;
+      background-attachment: fixed;
       font-family: "Segoe UI", Arial, sans-serif;
       text-align: center;
       padding: 20px;
       color: #e0e1dd;
+    }
+
+    /* Mobile fix: evita problemi con background fixed */
+    @media (max-width: 768px) {
+      body {
+        background-attachment: scroll;
+      }
     }
 
     h1 {
@@ -51,23 +59,6 @@
       line-height: 1.6;
     }
 
-    #toggle-dark {
-      margin-top: 20px;
-      padding: 12px 26px;
-      background: #415a77;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 17px;
-      transition: background 0.3s, transform 0.2s;
-    }
-
-    #toggle-dark:hover {
-      background: #778da9;
-      transform: scale(1.05);
-    }
-
     .logo-wrapper {
       margin-bottom: 20px;
     }
@@ -101,8 +92,6 @@
     <div id="volume">Volume 24h: ...</div>
   </div>
 
-  <button id="toggle-dark">Tema Scuro/Chiaro</button>
-
   <div class="card">
     <div id="candles-container"></div>
   </div>
@@ -131,7 +120,6 @@
       }
     }
 
-    // Ricostruzione candele giornaliere da dati di prezzo
     function buildDailyCandles(prices) {
       const byDay = {};
 
@@ -164,7 +152,7 @@
         const res = await fetch("https://api.coingecko.com/api/v3/coins/punchy-puff/market_chart?vs_currency=usd&days=7");
         const data = await res.json();
 
-        const prices = data.prices; // [ [timestamp, price], ... ]
+        const prices = data.prices;
         const candles = buildDailyCandles(prices);
 
         const container = document.getElementById("candles-container");
@@ -201,17 +189,6 @@
       }
     }
 
-    // Tema scuro/chiaro (solo overlay, lo sfondo resta il ring)
-    document.getElementById("toggle-dark").addEventListener("click", () => {
-      document.body.classList.toggle("light-mode");
-      if (document.body.classList.contains("light-mode")) {
-        document.body.style.color = "#111";
-      } else {
-        document.body.style.color = "#e0e1dd";
-      }
-    });
-
-    // Caricamento iniziale
     loadPrice();
     loadCandles();
     setInterval(loadPrice, 30000);
