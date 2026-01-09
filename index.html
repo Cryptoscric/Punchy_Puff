@@ -3,8 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Punchy Puff Meme Dashboard</title>
-
-  <!-- Lightweight Charts (TradingView) -->
   <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 
   <style>
@@ -18,7 +16,6 @@
       color: #e0e1dd;
     }
 
-    /* Mobile fix: evita problemi con background fixed */
     @media (max-width: 768px) {
       body {
         background-attachment: scroll;
@@ -30,7 +27,6 @@
       margin-bottom: 10px;
       color: #e0e1dd;
       text-shadow: 0 0 12px rgba(137,207,240,0.5);
-      letter-spacing: 1px;
     }
 
     #punchy-price {
@@ -74,6 +70,17 @@
     #candles-container {
       width: 100%;
       height: 400px;
+      position: relative;
+    }
+
+    #no-data {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #ccc;
+      font-size: 18px;
+      font-style: italic;
     }
   </style>
 </head>
@@ -93,7 +100,9 @@
   </div>
 
   <div class="card">
-    <div id="candles-container"></div>
+    <div id="candles-container">
+      <div id="no-data" style="display:none;">Nessun dato disponibile</div>
+    </div>
   </div>
 
   <script>
@@ -106,14 +115,9 @@
         const marketCap = data["punchy-puff"].usd_market_cap;
         const volume = data["punchy-puff"].usd_24h_vol;
 
-        document.getElementById("punchy-price").innerText =
-          "PUNCHY: " + price + " $";
-
-        document.getElementById("market-cap").innerText =
-          "Market Cap: " + (marketCap ? marketCap.toLocaleString() + " $" : "N/D");
-
-        document.getElementById("volume").innerText =
-          "Volume 24h: " + (volume ? volume.toLocaleString() + " $" : "N/D");
+        document.getElementById("punchy-price").innerText = "PUNCHY: " + price + " $";
+        document.getElementById("market-cap").innerText = "Market Cap: " + (marketCap ? marketCap.toLocaleString() + " $" : "N/D");
+        document.getElementById("volume").innerText = "Volume 24h: " + (volume ? volume.toLocaleString() + " $" : "N/D");
 
       } catch (e) {
         document.getElementById("punchy-price").innerText = "Errore nel caricamento";
@@ -122,7 +126,6 @@
 
     function buildDailyCandles(prices) {
       const byDay = {};
-
       prices.forEach(p => {
         const ts = p[0];
         const price = p[1];
@@ -155,6 +158,11 @@
         const prices = data.prices;
         const candles = buildDailyCandles(prices);
 
+        if (!candles || candles.length < 2) {
+          document.getElementById("no-data").style.display = "block";
+          return;
+        }
+
         const container = document.getElementById("candles-container");
         const chart = LightweightCharts.createChart(container, {
           layout: {
@@ -185,7 +193,7 @@
         candleSeries.setData(candles);
 
       } catch (e) {
-        console.log("Errore candele:", e);
+        document.getElementById("no-data").style.display = "block";
       }
     }
 
