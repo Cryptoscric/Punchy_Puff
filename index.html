@@ -12,9 +12,11 @@
     async function loadPrice() {
       const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=punchy-puff&vs_currencies=usd");
       const data = await res.json();
+
       document.getElementById("punchy-price").innerText =
-        "PUNCHY: " + data.punchy-puff.usd + " $";
+        "PUNCHY: " + data["punchy-puff"].usd + " $";
     }
+
     loadPrice();
   </script>
 </body>
