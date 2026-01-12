@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Punchy Puff Meme Dashboard</title>
+  <title>Punchy Puff Dashboard</title>
 
   <!-- TradingView -->
   <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
@@ -103,9 +103,7 @@
   </div>
 
   <script>
-    // Se in futuro avrai una tua API per prezzo/market cap/volume,
-    // potrai sostituire questa parte con le tue chiamate.
-    // Per ora lascio i campi statici come placeholder:
+    // Valori statici (puoi sostituirli con API reali)
     document.getElementById("punchy-price").innerText = "PUNCHY: 0.00058093 $";
     document.getElementById("market-cap").innerText = "Market Cap: 290,462,664 $";
     document.getElementById("volume").innerText = "Volume 24h: 1,924,264 $";
@@ -128,5 +126,6 @@
       "container_id": "tradingview_chart"
     });
   </script>
+
 </body>
 </html>
