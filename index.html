@@ -10,6 +10,7 @@
   <style>
     :root {
       --accent: #89cff0;
+      --accent-strong: #5ecbff;
       --bg-glass: rgba(0, 0, 0, 0.65);
       --text-main: #e0e1dd;
       --danger: #ff4d6a;
@@ -224,6 +225,34 @@
       box-shadow: 0 0 16px rgba(137,207,240,0.9);
     }
 
+    .contract-box {
+      margin-top: 25px;
+      padding: 20px;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(137,207,240,0.4);
+      box-shadow: 0 0 20px rgba(137,207,240,0.3);
+      text-align: center;
+    }
+
+    .contract-link {
+      color: var(--accent-strong);
+      text-decoration: none;
+      font-weight: bold;
+      word-break: break-all;
+      font-size: 18px;
+    }
+
+    .contract-link:hover {
+      text-shadow: 0 0 10px rgba(137,207,240,0.8);
+    }
+
+    .sol-price {
+      font-size: 18px;
+      margin-top: 5px;
+      opacity: 0.9;
+    }
+
     .tradingview-widget-container {
       width: 100%;
       height: 400px;
@@ -253,23 +282,6 @@
       font-size: 22px;
       margin-bottom: 10px;
       text-shadow: 0 0 8px rgba(137,207,240,0.5);
-    }
-
-    .contract-link {
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: bold;
-      word-break: break-all;
-    }
-
-    .contract-link:hover {
-      text-shadow: 0 0 10px rgba(137,207,240,0.8);
-    }
-
-    .sol-price {
-      font-size: 18px;
-      margin-top: 5px;
-      opacity: 0.9;
     }
   </style>
 </head>
@@ -324,19 +336,25 @@
             <div class="metric-value" id="holders">...</div>
           </div>
         </div>
-
-        <div style="margin-top:18px;">
-          <span class="metric-label">Contract Address</span><br>
-          <a class="contract-link"
-             href="https://solscan.io/token/GnYufMbTAMz1DzkSN2DmwkBzjMTLkM22WvQuN1VCbonk"
-             target="_blank">
-            GnYufMbTAMz1DzkSN2DmwkBzjMTLkM22WvQuN1VCbonk
-          </a>
-          <button class="copy-btn" onclick="copyContract()">
-            Copy
-          </button>
-        </div>
       </div>
+
+      <!-- CONTRACT BOX -->
+      <div class="contract-box">
+        <div class="section-title">Contract Address</div>
+
+        <a class="contract-link"
+           href="https://solscan.io/token/GnYufMbTAMz1DzkSN2DmwkBzjMTLkM22WvQuN1VCbonk"
+           target="_blank">
+          GnYufMbTAMz1DzkSN2DmwkBzjMTLkM22WvQuN1VCbonk
+        </a>
+
+        <br><br>
+
+        <button class="copy-btn" onclick="copyContract()">
+          Copy
+        </button>
+      </div>
+
     </section>
 
     <!-- MARKET -->
@@ -373,7 +391,7 @@
       </div>
     </section>
 
-    <!-- "LATEST TRANSACTIONS" = STATISTICHE TX 24H -->
+    <!-- TRANSACTIONS -->
     <section id="txs">
       <div class="card metrics">
         <div class="section-title">Latest transactions</div>
@@ -454,7 +472,6 @@
           document.getElementById("sells-24h").innerText = sells.toLocaleString();
           document.getElementById("tx-count-24h").innerText = total.toLocaleString();
 
-          // riuso anche per il box "Market overview"
           document.getElementById("tx-count").innerText = total.toLocaleString();
         }
 
@@ -477,12 +494,12 @@
 
     async function updateHolders() {
       try {
-        const res = await fetch("https://api.solscan.io/token/meta?token=" + CONTRACT);
+        const res = await fetch("https://api.solscan.io/token/holders?token=" + CONTRACT + "&offset=0&limit=1");
         const data = await res.json();
 
-        if (data && data.data && data.data.holder !== undefined) {
+        if (data && data.total !== undefined) {
           document.getElementById("holders").innerText =
-            data.data.holder.toLocaleString();
+            data.total.toLocaleString();
         } else {
           document.getElementById("holders").innerText = "N/A";
         }
@@ -498,34 +515,5 @@
       alert("Contract address copiato negli appunti!");
     }
 
-    // inizializzazioni
     updatePunchyData();
-    updateSolPrice();
-    updateHolders();
-
-    // aggiornamenti periodici
-    setInterval(updatePunchyData, 30000);
-    setInterval(updateSolPrice, 60000);
-    setInterval(updateHolders, 60000);
-
-    // TradingView
-    new TradingView.widget({
-      "width": "100%",
-      "height": 400,
-      "symbol": "RAYDIUMCPMM:PUNCHYSOL_3E5HFY",
-      "interval": "60",
-      "timezone": "Etc/UTC",
-      "theme": "dark",
-      "style": "1",
-      "locale": "it",
-      "toolbar_bg": "rgba(0,0,0,0.3)",
-      "enable_publishing": false,
-      "allow_symbol_change": false,
-      "hide_top_toolbar": false,
-      "hide_legend": false,
-      "container_id": "tradingview_chart"
-    });
-  </script>
-
-</body>
-</html>
+    updateSol
