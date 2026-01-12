@@ -380,7 +380,7 @@
           </div>
           <div class="metric-item">
             <div class="metric-label">Holders</div>
-            <div class="metric-value" id="holders">N/A</div>
+            <div class="metric-value" id="holders">...</div>
           </div>
         </div>
 
@@ -488,7 +488,6 @@
           document.getElementById("tx-count").innerText = txCount.toLocaleString();
         }
 
-        // Ultime transazioni (se disponibili)
         if (pair.txns && pair.txns.h24 && pair.txns.h24.list) {
           const list = pair.txns.h24.list.slice(0, 10);
           renderTransactions(list);
@@ -550,6 +549,24 @@
       }
     }
 
+    async function updateHolders() {
+      try {
+        const res = await fetch("https://api.solscan.io/token/meta?token=" + CONTRACT);
+        const data = await res.json();
+
+        if (data && data.data && data.data.holder !== undefined) {
+          document.getElementById("holders").innerText =
+            data.data.holder.toLocaleString();
+        } else {
+          document.getElementById("holders").innerText = "N/A";
+        }
+
+      } catch (e) {
+        console.error("Errore holders:", e);
+        document.getElementById("holders").innerText = "N/A";
+      }
+    }
+
     function copyContract() {
       navigator.clipboard.writeText(CONTRACT);
       alert("Contract address copiato negli appunti!");
@@ -557,9 +574,11 @@
 
     updatePunchyData();
     updateSolPrice();
+    updateHolders();
 
     setInterval(updatePunchyData, 30000);
     setInterval(updateSolPrice, 60000);
+    setInterval(updateHolders, 60000);
 
     new TradingView.widget({
       "width": "100%",
