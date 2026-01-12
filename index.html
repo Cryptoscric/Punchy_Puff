@@ -8,26 +8,100 @@
   <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 
   <style>
+    :root {
+      --accent: #89cff0;
+      --bg-glass: rgba(0, 0, 0, 0.65);
+      --text-main: #e0e1dd;
+      --danger: #ff4d6a;
+      --success: #2ecc71;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
+      margin: 0;
       background: url('ring.jpg') no-repeat center center;
       background-size: cover;
       background-attachment: fixed;
       font-family: "Segoe UI", Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-      color: #e0e1dd;
+      color: var(--text-main);
+      padding: 80px 20px 20px;
     }
 
     @media (max-width: 768px) {
       body {
         background-attachment: scroll;
+        padding: 70px 10px 10px;
       }
+    }
+
+    /* Navbar */
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 100;
+      box-shadow: 0 0 18px rgba(0,0,0,0.5);
+    }
+
+    .nav-title {
+      font-weight: bold;
+      letter-spacing: 1px;
+      color: var(--accent);
+      text-shadow: 0 0 10px rgba(137,207,240,0.7);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 15px;
+      font-size: 14px;
+    }
+
+    .nav-links a {
+      color: var(--text-main);
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 10px;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+
+    .nav-links a:hover {
+      background: rgba(137,207,240,0.15);
+      color: var(--accent);
+      box-shadow: 0 0 10px rgba(137,207,240,0.4);
+    }
+
+    @media (max-width: 600px) {
+      .nav-links {
+        font-size: 12px;
+        gap: 8px;
+      }
+    }
+
+    /* Layout base */
+
+    .page-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      text-align: center;
     }
 
     h1 {
       font-size: 38px;
       margin-bottom: 10px;
-      color: #e0e1dd;
+      color: var(--text-main);
       text-shadow: 0 0 12px rgba(137,207,240,0.5);
       letter-spacing: 1px;
     }
@@ -36,26 +110,78 @@
       font-size: 42px;
       font-weight: bold;
       margin-top: 10px;
-      color: #89cff0;
-      text-shadow: 0 0 10px rgba(137,207,240,0.6);
+      color: var(--accent);
+      text-shadow: 0 0 10px rgba(137,207,240,0.8);
+      animation: neon-pulse 2.2s ease-in-out infinite;
+    }
+
+    @keyframes neon-pulse {
+      0%, 100% {
+        text-shadow: 0 0 8px rgba(137,207,240,0.7),
+                     0 0 16px rgba(137,207,240,0.4);
+      }
+      50% {
+        text-shadow: 0 0 16px rgba(137,207,240,1),
+                     0 0 28px rgba(137,207,240,0.8);
+      }
     }
 
     .card {
-      width: 90%;
-      max-width: 700px;
+      width: 100%;
       margin: 20px auto;
       padding: 25px;
       border-radius: 18px;
-      background: rgba(0, 0, 0, 0.65);
+      background: var(--bg-glass);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       box-shadow: 0 0 25px rgba(0,0,0,0.35);
+      text-align: left;
+    }
+
+    .card.center {
+      text-align: center;
     }
 
     .metrics {
-      font-size: 20px;
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+    .metrics-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
       margin-top: 10px;
-      line-height: 1.6;
+    }
+
+    .metric-item {
+      flex: 1 1 160px;
+      min-width: 0;
+    }
+
+    .metric-label {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      opacity: 0.85;
+    }
+
+    .metric-value {
+      font-size: 20px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .metric-value.accent {
+      color: var(--accent);
+    }
+
+    .metric-value.green {
+      color: var(--success);
+    }
+
+    .metric-value.red {
+      color: var(--danger);
     }
 
     .logo-wrapper {
@@ -68,6 +194,16 @@
       height: auto;
       border-radius: 12px;
       box-shadow: 0 0 20px rgba(137,207,240,0.4);
+      animation: logo-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes logo-glow {
+      0%, 100% {
+        box-shadow: 0 0 12px rgba(137,207,240,0.4);
+      }
+      50% {
+        box-shadow: 0 0 24px rgba(137,207,240,0.9);
+      }
     }
 
     .copy-btn {
@@ -75,11 +211,17 @@
       padding: 5px 10px;
       border: none;
       border-radius: 6px;
-      background: #89cff0;
+      background: var(--accent);
       color: #000;
       font-weight: bold;
       cursor: pointer;
       box-shadow: 0 0 10px rgba(137,207,240,0.6);
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    .copy-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 16px rgba(137,207,240,0.9);
     }
 
     .tradingview-widget-container {
@@ -91,71 +233,333 @@
       width: 100%;
       height: 400px;
     }
+
+    @media (max-width: 768px) {
+      .tradingview-widget-container,
+      .tradingview-widget-container__widget {
+        height: 320px;
+      }
+
+      h1 {
+        font-size: 30px;
+      }
+
+      #punchy-price {
+        font-size: 32px;
+      }
+    }
+
+    .section-title {
+      font-size: 22px;
+      margin-bottom: 10px;
+      text-shadow: 0 0 8px rgba(137,207,240,0.5);
+    }
+
+    .contract-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: bold;
+      word-break: break-all;
+    }
+
+    .contract-link:hover {
+      text-shadow: 0 0 10px rgba(137,207,240,0.8);
+    }
+
+    .sol-price {
+      font-size: 18px;
+      margin-top: 5px;
+      opacity: 0.9;
+    }
+
+    /* Lista transazioni */
+
+    .tx-list {
+      margin-top: 15px;
+      list-style: none;
+      padding: 0;
+      font-size: 14px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .tx-item {
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.02);
+      margin-bottom: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .tx-hash {
+      font-family: monospace;
+      font-size: 12px;
+      opacity: 0.85;
+      word-break: break-all;
+    }
+
+    .tx-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .tx-label {
+      opacity: 0.8;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      background: rgba(137,207,240,0.15);
+      color: var(--accent);
+    }
+
+    .badge-sell {
+      background: rgba(255,77,106,0.18);
+      color: var(--danger);
+    }
+
+    .badge-buy {
+      background: rgba(46,204,113,0.18);
+      color: var(--success);
+    }
   </style>
 </head>
 
 <body>
 
-  <div class="logo-wrapper">
-    <img src="logo.png" alt="Punchy Puff Logo">
-  </div>
-
-  <h1>Punchy Puff Dashboard</h1>
-  <div id="punchy-price">PUNCHY: ... $</div>
-
-  <div class="card metrics">
-    <div id="market-cap">Market Cap: ...</div>
-    <div id="volume">Volume 24h: ...</div>
-
-    <div id="contract">
-      Contract Address:
-      <a href="https://solscan.io/token/GnYufMbTAMz1DzkSN2DmwkBzjMTLkM22WvQuN1VCbonk"
-         target="_blank"
-         style="color:#89cff0; text-decoration:none; font-weight:bold;">
-         GnYufMbTAMz1DzkSN2DmwkBzjMTLkM22WvQuN1VCbonk
-      </a>
-
-      <button class="copy-btn" onclick="copyContract()">
-        Copy
-      </button>
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="nav-title">PUNCHY PUFF</div>
+    <div class="nav-links">
+      <a href="#overview">Overview</a>
+      <a href="#market">Market</a>
+      <a href="#chart">Chart</a>
+      <a href="#txs">Transactions</a>
     </div>
   </div>
 
-  <div class="card">
-    <div class="tradingview-widget-container">
-      <div id="tradingview_chart" class="tradingview-widget-container__widget"></div>
-    </div>
+  <div class="page-container">
+
+    <section id="overview">
+      <div class="logo-wrapper">
+        <img src="logo.png" alt="Punchy Puff Logo">
+      </div>
+
+      <h1>Punchy Puff Dashboard</h1>
+      <div id="punchy-price">PUNCHY: ... $</div>
+      <div class="sol-price" id="sol-price">SOL: ... $</div>
+
+      <div class="card metrics center">
+        <div class="section-title">Token metrics</div>
+
+        <div class="metrics-row">
+          <div class="metric-item">
+            <div class="metric-label">Market Cap</div>
+            <div class="metric-value accent" id="market-cap">...</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">Volume 24h</div>
+            <div class="metric-value" id="volume">...</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">Liquidity</div>
+            <div class="metric-value" id="liquidity">...</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">FDV</div>
+            <div class="metric-value" id="fdv">...</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">Holders</div>
+            <div class="metric-value" id="holders">N/A</div>
+          </div>
+        </div>
+
+        <div style="margin-top:18px;">
+          <span class="metric-label">Contract Address</span><br>
+          <a class="contract-link"
+             href="https://solscan.io/token/GnYufMbTAMz1DzkSN2DmwkBzjMTLkM22WvQuN1VCbonk"
+             target="_blank">
+            GnYufMbTAMz1DzkSN2DmwkBzjMTLkM22WvQuN1VCbonk
+          </a>
+          <button class="copy-btn" onclick="copyContract()">
+            Copy
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="market">
+      <div class="card metrics">
+        <div class="section-title">Market overview</div>
+        <p style="margin:0 0 10px 0; opacity:0.9;">
+          Dati in tempo quasi reale da DexScreener.
+        </p>
+        <div class="metrics-row">
+          <div class="metric-item">
+            <div class="metric-label">Pair</div>
+            <div class="metric-value" id="pair-name">PUNCHY / SOL</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">Price change 24h</div>
+            <div class="metric-value" id="price-change">...</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">TX count 24h</div>
+            <div class="metric-value" id="tx-count">...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="chart">
+      <div class="card center">
+        <div class="section-title">Chart</div>
+        <div class="tradingview-widget-container">
+          <div id="tradingview_chart" class="tradingview-widget-container__widget"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="txs">
+      <div class="card">
+        <div class="section-title">Latest transactions</div>
+        <p style="margin:0 0 10px 0; opacity:0.9;">
+          Ultime operazioni sul pair principale (buy/sell, volume, ora).
+        </p>
+        <ul class="tx-list" id="tx-list">
+          <li class="tx-item">
+            <div class="tx-row">
+              <span class="badge">INFO</span>
+              <span>In attesa di dati...</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
   </div>
 
   <script>
+    const CONTRACT = "GnYufMbTAMz1DzkSN2DmwkBzjMTLkM22WvQuN1VCbonk";
+
     async function updatePunchyData() {
       try {
-        const response = await fetch("https://api.dexscreener.com/latest/dex/tokens/GnYufMbTAMz1DzkSN2DmwkBzjMTLkM22WvQuN1VCbonk");
+        const response = await fetch("https://api.dexscreener.com/latest/dex/tokens/" + CONTRACT);
         const data = await response.json();
 
-        const pair = data.pairs[0];
+        const pair = data.pairs && data.pairs[0];
+        if (!pair) return;
 
         const price = pair.priceUsd;
         const marketCap = pair.fdv;
-        const volume24h = pair.volume.h24;
+        const volume24h = pair.volume && pair.volume.h24;
+        const liquidityUsd = pair.liquidity && pair.liquidity.usd;
+        const fdv = pair.fdv;
+        const priceChange = pair.priceChange && pair.priceChange.h24;
+        const txCount = pair.txns && pair.txns.h24 && (pair.txns.h24.buys + pair.txns.h24.sells);
 
-        document.getElementById("punchy-price").innerText = `PUNCHY: ${price} $`;
-        document.getElementById("market-cap").innerText = `Market Cap: ${marketCap.toLocaleString()} $`;
-        document.getElementById("volume").innerText = `Volume 24h: ${volume24h.toLocaleString()} $`;
+        document.getElementById("punchy-price").innerText = `PUNCHY: ${Number(price).toFixed(8)} $`;
+        document.getElementById("market-cap").innerText = marketCap ? `${Math.round(marketCap).toLocaleString()} $` : "...";
+        document.getElementById("volume").innerText = volume24h ? `${Math.round(volume24h).toLocaleString()} $` : "...";
+        document.getElementById("liquidity").innerText = liquidityUsd ? `${Math.round(liquidityUsd).toLocaleString()} $` : "...";
+        document.getElementById("fdv").innerText = fdv ? `${Math.round(fdv).toLocaleString()} $` : "...";
+
+        document.getElementById("pair-name").innerText = pair.baseToken.symbol + " / " + pair.quoteToken.symbol;
+
+        if (priceChange !== undefined && priceChange !== null) {
+          const el = document.getElementById("price-change");
+          el.innerText = `${priceChange.toFixed(2)} %`;
+          el.classList.remove("green", "red");
+          if (priceChange > 0) el.classList.add("green");
+          if (priceChange < 0) el.classList.add("red");
+        }
+
+        if (txCount !== undefined && txCount !== null) {
+          document.getElementById("tx-count").innerText = txCount.toLocaleString();
+        }
+
+        // Ultime transazioni (se disponibili)
+        if (pair.txns && pair.txns.h24 && pair.txns.h24.list) {
+          const list = pair.txns.h24.list.slice(0, 10);
+          renderTransactions(list);
+        }
 
       } catch (error) {
-        console.error("Errore nel recupero dati:", error);
+        console.error("Errore nel recupero dati PUNCHY:", error);
       }
     }
 
-    updatePunchyData();
-    setInterval(updatePunchyData, 30000);
+    function renderTransactions(txs) {
+      const listEl = document.getElementById("tx-list");
+      listEl.innerHTML = "";
+
+      if (!txs || !txs.length) {
+        listEl.innerHTML = `<li class="tx-item"><span>Nessuna transazione recente trovata.</span></li>`;
+        return;
+      }
+
+      txs.forEach(tx => {
+        const li = document.createElement("li");
+        li.className = "tx-item";
+
+        const side = tx.side || "trade";
+        const isBuy = side.toLowerCase() === "buy";
+
+        const badgeClass = isBuy ? "badge-buy" : "badge-sell";
+        const badgeText = isBuy ? "BUY" : "SELL";
+
+        const priceUsd = tx.priceUsd ? Number(tx.priceUsd).toFixed(8) : "...";
+        const amountToken = tx.baseAmount ? Number(tx.baseAmount).toFixed(4) : "...";
+        const volumeUsd = tx.volumeUsd ? Math.round(tx.volumeUsd) : null;
+
+        const time = tx.time ? new Date(tx.time).toLocaleTimeString() : "";
+
+        li.innerHTML = `
+          <div class="tx-row">
+            <span class="badge ${badgeClass}">${badgeText}</span>
+            <span class="tx-label">${amountToken} PUNCHY</span>
+            <span class="tx-label">@ ${priceUsd} $</span>
+            <span class="tx-label">${volumeUsd ? volumeUsd.toLocaleString() + " $" : ""}</span>
+            <span class="tx-label">${time}</span>
+          </div>
+          <div class="tx-hash">${tx.txUrl || ""}</div>
+        `;
+
+        listEl.appendChild(li);
+      });
+    }
+
+    async function updateSolPrice() {
+      try {
+        const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd");
+        const data = await res.json();
+        const price = data.solana.usd;
+        document.getElementById("sol-price").innerText = `SOL: ${price.toLocaleString()} $`;
+      } catch (e) {
+        console.error("Errore nel recupero prezzo SOL:", e);
+      }
+    }
 
     function copyContract() {
-      const contract = "GnYufMbTAMz1DzkSN2DmwkBzjMTLkM22WvQuN1VCbonk";
-      navigator.clipboard.writeText(contract);
+      navigator.clipboard.writeText(CONTRACT);
       alert("Contract address copiato negli appunti!");
     }
+
+    updatePunchyData();
+    updateSolPrice();
+
+    setInterval(updatePunchyData, 30000);
+    setInterval(updateSolPrice, 60000);
 
     new TradingView.widget({
       "width": "100%",
