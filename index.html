@@ -271,66 +271,6 @@
       margin-top: 5px;
       opacity: 0.9;
     }
-
-    /* Lista transazioni */
-
-    .tx-list {
-      margin-top: 15px;
-      list-style: none;
-      padding: 0;
-      font-size: 14px;
-      max-height: 260px;
-      overflow-y: auto;
-    }
-
-    .tx-item {
-      padding: 8px 10px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.02);
-      margin-bottom: 6px;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .tx-hash {
-      font-family: monospace;
-      font-size: 12px;
-      opacity: 0.85;
-      word-break: break-all;
-    }
-
-    .tx-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .tx-label {
-      opacity: 0.8;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      background: rgba(137,207,240,0.15);
-      color: var(--accent);
-    }
-
-    .badge-sell {
-      background: rgba(255,77,106,0.18);
-      color: var(--danger);
-    }
-
-    .badge-buy {
-      background: rgba(46,204,113,0.18);
-      color: var(--success);
-    }
   </style>
 </head>
 
@@ -349,6 +289,7 @@
 
   <div class="page-container">
 
+    <!-- OVERVIEW -->
     <section id="overview">
       <div class="logo-wrapper">
         <img src="logo.png" alt="Punchy Puff Logo">
@@ -398,6 +339,7 @@
       </div>
     </section>
 
+    <!-- MARKET -->
     <section id="market">
       <div class="card metrics">
         <div class="section-title">Market overview</div>
@@ -421,6 +363,7 @@
       </div>
     </section>
 
+    <!-- CHART -->
     <section id="chart">
       <div class="card center">
         <div class="section-title">Chart</div>
@@ -430,20 +373,28 @@
       </div>
     </section>
 
+    <!-- "LATEST TRANSACTIONS" = STATISTICHE TX 24H -->
     <section id="txs">
-      <div class="card">
+      <div class="card metrics">
         <div class="section-title">Latest transactions</div>
         <p style="margin:0 0 10px 0; opacity:0.9;">
-          Ultime operazioni sul pair principale (buy/sell, volume, ora).
+          Statistiche sulle operazioni nelle ultime 24 ore (fonte: DexScreener).
         </p>
-        <ul class="tx-list" id="tx-list">
-          <li class="tx-item">
-            <div class="tx-row">
-              <span class="badge">INFO</span>
-              <span>In attesa di dati...</span>
-            </div>
-          </li>
-        </ul>
+
+        <div class="metrics-row">
+          <div class="metric-item">
+            <div class="metric-label">Buy 24h</div>
+            <div class="metric-value green" id="buys-24h">...</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">Sell 24h</div>
+            <div class="metric-value red" id="sells-24h">...</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label">Totale TX 24h</div>
+            <div class="metric-value" id="tx-count-24h">...</div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -466,15 +417,25 @@
         const liquidityUsd = pair.liquidity && pair.liquidity.usd;
         const fdv = pair.fdv;
         const priceChange = pair.priceChange && pair.priceChange.h24;
-        const txCount = pair.txns && pair.txns.h24 && (pair.txns.h24.buys + pair.txns.h24.sells);
+        const txns = pair.txns && pair.txns.h24;
 
-        document.getElementById("punchy-price").innerText = `PUNCHY: ${Number(price).toFixed(8)} $`;
-        document.getElementById("market-cap").innerText = marketCap ? `${Math.round(marketCap).toLocaleString()} $` : "...";
-        document.getElementById("volume").innerText = volume24h ? `${Math.round(volume24h).toLocaleString()} $` : "...";
-        document.getElementById("liquidity").innerText = liquidityUsd ? `${Math.round(liquidityUsd).toLocaleString()} $` : "...";
-        document.getElementById("fdv").innerText = fdv ? `${Math.round(fdv).toLocaleString()} $` : "...";
+        document.getElementById("punchy-price").innerText =
+          `PUNCHY: ${Number(price).toFixed(8)} $`;
 
-        document.getElementById("pair-name").innerText = pair.baseToken.symbol + " / " + pair.quoteToken.symbol;
+        document.getElementById("market-cap").innerText =
+          marketCap ? `${Math.round(marketCap).toLocaleString()} $` : "...";
+
+        document.getElementById("volume").innerText =
+          volume24h ? `${Math.round(volume24h).toLocaleString()} $` : "...";
+
+        document.getElementById("liquidity").innerText =
+          liquidityUsd ? `${Math.round(liquidityUsd).toLocaleString()} $` : "...";
+
+        document.getElementById("fdv").innerText =
+          fdv ? `${Math.round(fdv).toLocaleString()} $` : "...";
+
+        document.getElementById("pair-name").innerText =
+          pair.baseToken.symbol + " / " + pair.quoteToken.symbol;
 
         if (priceChange !== undefined && priceChange !== null) {
           const el = document.getElementById("price-change");
@@ -484,13 +445,17 @@
           if (priceChange < 0) el.classList.add("red");
         }
 
-        if (txCount !== undefined && txCount !== null) {
-          document.getElementById("tx-count").innerText = txCount.toLocaleString();
-        }
+        if (txns) {
+          const buys = txns.buys || 0;
+          const sells = txns.sells || 0;
+          const total = buys + sells;
 
-        if (pair.txns && pair.txns.h24 && pair.txns.h24.list) {
-          const list = pair.txns.h24.list.slice(0, 10);
-          renderTransactions(list);
+          document.getElementById("buys-24h").innerText = buys.toLocaleString();
+          document.getElementById("sells-24h").innerText = sells.toLocaleString();
+          document.getElementById("tx-count-24h").innerText = total.toLocaleString();
+
+          // riuso anche per il box "Market overview"
+          document.getElementById("tx-count").innerText = total.toLocaleString();
         }
 
       } catch (error) {
@@ -498,52 +463,13 @@
       }
     }
 
-    function renderTransactions(txs) {
-      const listEl = document.getElementById("tx-list");
-      listEl.innerHTML = "";
-
-      if (!txs || !txs.length) {
-        listEl.innerHTML = `<li class="tx-item"><span>Nessuna transazione recente trovata.</span></li>`;
-        return;
-      }
-
-      txs.forEach(tx => {
-        const li = document.createElement("li");
-        li.className = "tx-item";
-
-        const side = tx.side || "trade";
-        const isBuy = side.toLowerCase() === "buy";
-
-        const badgeClass = isBuy ? "badge-buy" : "badge-sell";
-        const badgeText = isBuy ? "BUY" : "SELL";
-
-        const priceUsd = tx.priceUsd ? Number(tx.priceUsd).toFixed(8) : "...";
-        const amountToken = tx.baseAmount ? Number(tx.baseAmount).toFixed(4) : "...";
-        const volumeUsd = tx.volumeUsd ? Math.round(tx.volumeUsd) : null;
-
-        const time = tx.time ? new Date(tx.time).toLocaleTimeString() : "";
-
-        li.innerHTML = `
-          <div class="tx-row">
-            <span class="badge ${badgeClass}">${badgeText}</span>
-            <span class="tx-label">${amountToken} PUNCHY</span>
-            <span class="tx-label">@ ${priceUsd} $</span>
-            <span class="tx-label">${volumeUsd ? volumeUsd.toLocaleString() + " $" : ""}</span>
-            <span class="tx-label">${time}</span>
-          </div>
-          <div class="tx-hash">${tx.txUrl || ""}</div>
-        `;
-
-        listEl.appendChild(li);
-      });
-    }
-
     async function updateSolPrice() {
       try {
         const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd");
         const data = await res.json();
         const price = data.solana.usd;
-        document.getElementById("sol-price").innerText = `SOL: ${price.toLocaleString()} $`;
+        document.getElementById("sol-price").innerText =
+          `SOL: ${price.toLocaleString()} $`;
       } catch (e) {
         console.error("Errore nel recupero prezzo SOL:", e);
       }
@@ -572,14 +498,17 @@
       alert("Contract address copiato negli appunti!");
     }
 
+    // inizializzazioni
     updatePunchyData();
     updateSolPrice();
     updateHolders();
 
+    // aggiornamenti periodici
     setInterval(updatePunchyData, 30000);
     setInterval(updateSolPrice, 60000);
     setInterval(updateHolders, 60000);
 
+    // TradingView
     new TradingView.widget({
       "width": "100%",
       "height": 400,
