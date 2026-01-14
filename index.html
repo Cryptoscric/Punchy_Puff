@@ -207,7 +207,6 @@
       height: 400px;
     }
 
-    /* Tabella Top Holders */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -491,27 +490,39 @@
       }
     }
 
-    // HOLDERS: totale + top 10 + grafico distribuzione
+    async function fetchHolderCount() {
+      const res = await fetch(
+        "https://public-api.birdeye.so/public/token/holder_count?address=" + CONTRACT,
+        { headers: { "x-chain": "solana" } }
+      );
+      const data = await res.json();
+      console.log("holder_count:", data);
+
+      if (data && data.data && (data.data.holder !== undefined || data.data.total !== undefined)) {
+        return data.data.holder ?? data.data.total;
+      }
+      return null;
+    }
+
+    async function fetchTopHolders() {
+      const res = await fetch(
+        "https://public-api.birdeye.so/public/token/holders?address=" + CONTRACT + "&page=1&limit=10",
+        { headers: { "x-chain": "solana" } }
+      );
+      const data = await res.json();
+      console.log("holders list:", data);
+
+      if (data && data.data && Array.isArray(data.data.items)) {
+        return data.data.items;
+      }
+      return [];
+    }
+
     async function updateHolders() {
       try {
-        const res = await fetch(
-          "https://public-api.birdeye.so/public/token/holders?address=" + CONTRACT + "&page=1&limit=10",
-          { headers: { "x-chain": "solana" } }
-        );
+        const totalHolders = await fetchHolderCount();
 
-        const data = await res.json();
-
-        if (!data || !data.data) {
-          document.getElementById("holders").innerText = "N/A";
-          document.getElementById("holders-total").innerText = "N/A";
-          return;
-        }
-
-        const totalHolders = data.data.holder || data.data.total || 0;
-        const items = data.data.items || [];
-
-        // Totale holders (overview + sezione holders)
-        if (totalHolders) {
+        if (totalHolders !== null) {
           document.getElementById("holders").innerText = totalHolders.toLocaleString();
           document.getElementById("holders-total").innerText = totalHolders.toLocaleString();
         } else {
@@ -519,7 +530,7 @@
           document.getElementById("holders-total").innerText = "N/A";
         }
 
-        // Tabella Top 10
+        const items = await fetchTopHolders();
         const tbody = document.getElementById("top-holders-body");
         tbody.innerHTML = "";
 
@@ -542,11 +553,15 @@
             tdAddr.innerText = h.address || h.owner || "-";
 
             const tdBal = document.createElement("td");
-            tdBal.innerText = h.balance ? Number(h.balance).toLocaleString() : "-";
+            const bal = h.amount ?? h.balance;
+            tdBal.innerText = bal ? Number(bal).toLocaleString() : "-";
 
             const tdPct = document.createElement("td");
-            const pct = h.percentage || h.percent || h.share;
-            tdPct.innerText = pct ? pct.toFixed ? pct.toFixed(4) + " %" : pct + " %" : "-";
+            const rawPct = h.percentage ?? h.percent ?? h.share;
+            const pctNum = rawPct !== undefined ? Number(rawPct) : null;
+            tdPct.innerText = pctNum !== null && !Number.isNaN(pctNum)
+              ? pctNum.toFixed(4) + " %"
+              : "-";
 
             tr.appendChild(tdIndex);
             tr.appendChild(tdAddr);
@@ -557,12 +572,15 @@
           });
         }
 
-        // Grafico distribuzione: somma percentuali top 10 vs resto
         let top10Pct = 0;
         items.forEach(h => {
-          const pct = h.percentage || h.percent || h.share;
-          if (pct) top10Pct += Number(pct);
+          const rawPct = h.percentage ?? h.percent ?? h.share;
+          const pctNum = rawPct !== undefined ? Number(rawPct) : null;
+          if (pctNum !== null && !Number.isNaN(pctNum)) {
+            top10Pct += pctNum;
+          }
         });
+
         if (top10Pct > 100) top10Pct = 100;
         const othersPct = 100 - top10Pct;
 
@@ -627,6 +645,10 @@
       "hide_legend": false,
       "container_id": "tradingview_chart"
     });
+  </script>
+
+</body>
+</html>
   </script>
 
 </body>
