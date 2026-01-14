@@ -17,9 +17,7 @@
       --success: #2ecc71;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -37,8 +35,6 @@
         padding: 70px 10px 10px;
       }
     }
-
-    /* NAVBAR CENTRATA */
 
     .navbar {
       position: fixed;
@@ -87,8 +83,6 @@
       color: var(--accent);
       box-shadow: 0 0 10px rgba(137,207,240,0.4);
     }
-
-    /* LAYOUT */
 
     .page-container {
       max-width: 1100px;
@@ -145,9 +139,7 @@
       margin-top: 10px;
     }
 
-    .metric-item {
-      flex: 1 1 160px;
-    }
+    .metric-item { flex: 1 1 160px; }
 
     .metric-label {
       font-size: 13px;
@@ -165,8 +157,6 @@
     .metric-value.red { color: var(--danger); }
     .metric-value.accent { color: var(--accent); }
 
-    /* LOGO */
-
     .logo-wrapper img {
       max-width: 160px;
       width: 40%;
@@ -179,8 +169,6 @@
       0%, 100% { box-shadow: 0 0 12px rgba(137,207,240,0.4); }
       50% { box-shadow: 0 0 24px rgba(137,207,240,0.9); }
     }
-
-    /* CONTRACT BOX */
 
     .contract-box {
       margin-top: 25px;
@@ -211,8 +199,6 @@
       cursor: pointer;
       box-shadow: 0 0 10px rgba(137,207,240,0.6);
     }
-
-    /* CHART */
 
     .tradingview-widget-container {
       width: 100%;
@@ -280,7 +266,6 @@
         </div>
       </div>
 
-      <!-- CONTRACT BOX -->
       <div class="contract-box">
         <div class="section-title">Contract Address</div>
 
@@ -421,14 +406,20 @@
       }
     }
 
+    /* -------------- NUOVA FUNZIONE HOLDERS (BIRDEYE) -------------- */
+
     async function updateHolders() {
       try {
-        const res = await fetch("https://api.solscan.io/token/holders?token=" + CONTRACT + "&offset=0&limit=1");
+        const res = await fetch(
+          "https://public-api.birdeye.so/public/token/holders?address=" + CONTRACT,
+          { headers: { "x-chain": "solana" } }
+        );
+
         const data = await res.json();
 
-        if (data && data.total !== undefined) {
+        if (data?.data?.holder) {
           document.getElementById("holders").innerText =
-            data.total.toLocaleString();
+            data.data.holder.toLocaleString();
         } else {
           document.getElementById("holders").innerText = "N/A";
         }
