@@ -6,8 +6,6 @@
 
   <!-- TradingView -->
   <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-  <!-- Chart.js per grafico distribuzione -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root {
@@ -249,8 +247,10 @@
       flex: 1 1 300px;
     }
 
-    canvas {
-      max-width: 100%;
+    .note {
+      font-size: 13px;
+      opacity: 0.8;
+      margin-top: 8px;
     }
   </style>
 </head>
@@ -310,7 +310,7 @@
           </div>
           <div class="metric-item">
             <div class="metric-label">Holders</div>
-            <div class="metric-value" id="holders">...</div>
+            <div class="metric-value" id="holders">N/A</div>
           </div>
         </div>
       </div>
@@ -355,7 +355,7 @@
       </div>
     </section>
 
-    <!-- HOLDERS + TOP 10 + DISTRIBUZIONE -->
+    <!-- HOLDERS (STATIC N/A) -->
     <section id="holders-section">
       <div class="card">
         <div class="section-title">Holders overview</div>
@@ -363,7 +363,7 @@
         <div class="holders-layout">
           <div class="holders-left">
             <div class="metric-label">Total holders</div>
-            <div class="metric-value accent" id="holders-total">...</div>
+            <div class="metric-value accent" id="holders-total">N/A</div>
 
             <div style="margin-top:15px; font-weight:600;">Top 10 holders</div>
             <table>
@@ -376,14 +376,23 @@
                 </tr>
               </thead>
               <tbody id="top-holders-body">
-                <tr><td colspan="4">Loading...</td></tr>
+                <tr>
+                  <td colspan="4">Not available via public API</td>
+                </tr>
               </tbody>
             </table>
+
+            <div class="note">
+              Holders data is not exposed by any free public API for this token.  
+              Section kept for future integration.
+            </div>
           </div>
 
           <div class="holders-right">
             <div style="font-weight:600; margin-bottom:5px;">Supply distribution</div>
-            <canvas id="holdersChart"></canvas>
+            <div class="note">
+              Distribution chart disabled (no reliable holders data available).
+            </div>
           </div>
         </div>
       </div>
@@ -425,7 +434,6 @@
 
   <script>
     const CONTRACT = "GnYufMbTAMz1DzkSN2DmwkBzjMTLkM22WvQuN1VCbonk";
-    let holdersChart = null;
 
     async function updatePunchyData() {
       try {
@@ -490,132 +498,6 @@
       }
     }
 
-    async function fetchHolderCount() {
-      const res = await fetch(
-        "https://public-api.birdeye.so/public/token/holder_count?address=" + CONTRACT,
-        { headers: { "x-chain": "solana" } }
-      );
-      const data = await res.json();
-      console.log("holder_count:", data);
-
-      if (data && data.data && (data.data.holder !== undefined || data.data.total !== undefined)) {
-        return data.data.holder ?? data.data.total;
-      }
-      return null;
-    }
-
-    async function fetchTopHolders() {
-      const res = await fetch(
-        "https://public-api.birdeye.so/public/token/holders?address=" + CONTRACT + "&page=1&limit=10",
-        { headers: { "x-chain": "solana" } }
-      );
-      const data = await res.json();
-      console.log("holders list:", data);
-
-      if (data && data.data && Array.isArray(data.data.items)) {
-        return data.data.items;
-      }
-      return [];
-    }
-
-    async function updateHolders() {
-      try {
-        const totalHolders = await fetchHolderCount();
-
-        if (totalHolders !== null) {
-          document.getElementById("holders").innerText = totalHolders.toLocaleString();
-          document.getElementById("holders-total").innerText = totalHolders.toLocaleString();
-        } else {
-          document.getElementById("holders").innerText = "N/A";
-          document.getElementById("holders-total").innerText = "N/A";
-        }
-
-        const items = await fetchTopHolders();
-        const tbody = document.getElementById("top-holders-body");
-        tbody.innerHTML = "";
-
-        if (!items.length) {
-          const tr = document.createElement("tr");
-          const td = document.createElement("td");
-          td.colSpan = 4;
-          td.innerText = "No data";
-          tr.appendChild(td);
-          tbody.appendChild(tr);
-        } else {
-          items.forEach((h, idx) => {
-            const tr = document.createElement("tr");
-
-            const tdIndex = document.createElement("td");
-            tdIndex.innerText = idx + 1;
-
-            const tdAddr = document.createElement("td");
-            tdAddr.className = "addr";
-            tdAddr.innerText = h.address || h.owner || "-";
-
-            const tdBal = document.createElement("td");
-            const bal = h.amount ?? h.balance;
-            tdBal.innerText = bal ? Number(bal).toLocaleString() : "-";
-
-            const tdPct = document.createElement("td");
-            const rawPct = h.percentage ?? h.percent ?? h.share;
-            const pctNum = rawPct !== undefined ? Number(rawPct) : null;
-            tdPct.innerText = pctNum !== null && !Number.isNaN(pctNum)
-              ? pctNum.toFixed(4) + " %"
-              : "-";
-
-            tr.appendChild(tdIndex);
-            tr.appendChild(tdAddr);
-            tr.appendChild(tdBal);
-            tr.appendChild(tdPct);
-
-            tbody.appendChild(tr);
-          });
-        }
-
-        let top10Pct = 0;
-        items.forEach(h => {
-          const rawPct = h.percentage ?? h.percent ?? h.share;
-          const pctNum = rawPct !== undefined ? Number(rawPct) : null;
-          if (pctNum !== null && !Number.isNaN(pctNum)) {
-            top10Pct += pctNum;
-          }
-        });
-
-        if (top10Pct > 100) top10Pct = 100;
-        const othersPct = 100 - top10Pct;
-
-        const ctx = document.getElementById("holdersChart").getContext("2d");
-        if (holdersChart) holdersChart.destroy();
-
-        holdersChart = new Chart(ctx, {
-          type: "pie",
-          data: {
-            labels: ["Top 10 holders", "Others"],
-            datasets: [{
-              data: [top10Pct, othersPct],
-              backgroundColor: ["#89cff0", "#ff4d6a"],
-              borderColor: "#111",
-              borderWidth: 1
-            }]
-          },
-          options: {
-            plugins: {
-              legend: {
-                labels: {
-                  color: "#e0e1dd"
-                }
-              }
-            }
-          }
-        });
-
-      } catch (e) {
-        console.error("Errore holders:", e);
-        document.getElementById("holders").innerText = "N/A";
-        document.getElementById("holders-total").innerText = "N/A";
-      }
-    }
-
     function copyContract() {
       navigator.clipboard.writeText(CONTRACT);
       alert("Contract address copiato!");
@@ -623,11 +505,9 @@
 
     updatePunchyData();
     updateSolPrice();
-    updateHolders();
 
     setInterval(updatePunchyData, 30000);
     setInterval(updateSolPrice, 60000);
-    setInterval(updateHolders, 60000);
 
     new TradingView.widget({
       "width": "100%",
@@ -645,10 +525,6 @@
       "hide_legend": false,
       "container_id": "tradingview_chart"
     });
-  </script>
-
-</body>
-</html>
   </script>
 
 </body>
